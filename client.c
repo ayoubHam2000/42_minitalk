@@ -3,56 +3,88 @@
 /*                                                        :::      ::::::::   */
 /*   client.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayoub <ayoub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 20:50:51 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/04 16:01:21 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/07 21:08:21 by ayoub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-#include <stdio.h>
-#include <wchar.h>
-#include <locale.h>
+static int	check_is_valid(int ac, char **av)
+{
+	if (ac != 3)
+		return (0);
+	if (atoi(av[1]) <= 0)
+		return (0);
+	return (1);
+}
 
-#define PART_SIZE 32
+static void	send_unit(pid_t receiver, unsigned int a)
+{
+	unsigned int	i;
+	unsigned int	bit;
 
-void send_int(int receiver, int a)
+	i = 0;
+	while (i < UNIT_SIZE)
+	{
+		usleep(WAIT_TIME);
+		bit = (a & 1);
+		if (bit)
+			kill(receiver, SIGUSR1);
+		else
+			kill(receiver, SIGUSR2);
+		a = (a >> 1);
+		i++;
+		pause();
+	}
+}
+
+static int	send_chunk(pid_t receiver, char *str, int start)
 {
 	int	i;
 
-	i = 0;
-	while (i < PART_SIZE)
+	i = start;
+	while (str[i] && i < CHUNK_SIZE + start)
 	{
-		if (a % 2)
-			kill(receiver, SIGUSR2);
-		else
-			kill(receiver, SIGUSR1);
+		send_unit(receiver, str[i]);
 		i++;
-		printf("Send To %d c = %d n = %d\n", receiver, a % 2, i);
-		a = a / 2;
-		usleep(50);
 	}
+	if (!str[i])
+		return (1);
+	return (0);
+}
+
+void h(int sig)
+{
+	//write(1, "*", 1);
+	return ;
 }
 
 int main(int ac, char **av)
 {
-	int		server_pid;
+	pid_t	server_pid;
 	char	*data;
 
-	if (ac < 3)
-		return (1);
-	server_pid = atoi(av[1]);
-	data = av[2];
-	if (server_pid <= 0)
-		return (1);
-	printf("ac = %d - server_pid = %d - string : %s\n", ac, server_pid, av[2]);
+	server_pid = get_server_pid();
+	data = av[1];
+	ft_printf("client Pid %d | server pid %d\n", getpid(), server_pid);
+	signal(SIGUSR1, h);
+	
+	
+	struct timeval	tv;
+  	gettimeofday(&tv, NULL);
+  	double begin = (tv.tv_sec) * 1000000 + (tv.tv_usec) ;
+	  
+	
 	int i = 0;
-	while (av[2][i])
-	{
-		send_int(server_pid, av[2][i]);
-		i++;
-	}
+	while (i++ < 2000)
+		send_unit(server_pid, i*2);
+
+	
+	gettimeofday(&tv, NULL);
+	double end = (tv.tv_sec) * 1000000 + (tv.tv_usec) ;
+  	printf("\nExecution time %f\n", end - begin);
 	return (0);
 }
