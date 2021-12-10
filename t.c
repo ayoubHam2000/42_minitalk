@@ -6,41 +6,44 @@
 /*   By: ayoub <ayoub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/07 16:39:18 by ayoub             #+#    #+#             */
-/*   Updated: 2021/12/07 19:07:33 by ayoub            ###   ########.fr       */
+/*   Updated: 2021/12/10 23:25:57 by ayoub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-void	tobinary(unsigned int a)
+void extractfromsize_t()
 {
-	unsigned int	i;
-	unsigned int	op;
-	unsigned int	bit;
-
+	size_t a;
+	char c;
+	int i;
+	
+	a = 300; //0000 0001 0010 1100
 	i = 0;
-	op = 1;
-	while (++i < UNIT_SIZE)
-		op = op * 2;
-	i = 0;
-	while (i < UNIT_SIZE)
+	while (i < 8)
 	{
-		bit = (a & op) / op;
-		if (bit)
-			write(1, "1", 1);
-		else
-			write(1, "0", 1);
-		a = (a << 1);
+		c = *((char *)(&a));
+		printf("%d\n", c);
+		a = a >> 8;
 		i++;
 	}
 }
 
-int main()
+int main(int ac, char **av)
 {
-	unsigned int a = 1;
+	size_t a;
+	int i;
+
+	char b[] = {44, 1, 0, 0, 0, 0, 0, 0};
 	
-	a = (unsigned int)1 << 6;
-	tobinary(a);
-	printf("\n%u", a);
+	a = 0;
+	char *c = (char *)(&a);
+	i = 0;
+	while (i < 8)
+	{
+		*(c + i) = b[i];
+		i++;
+	}
+	printf("%lu\n", a);
 	return (0);	
 }
