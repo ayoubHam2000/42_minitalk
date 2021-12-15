@@ -6,7 +6,7 @@
 /*   By: ayoub <ayoub@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 20:50:51 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/11 00:44:06 by ayoub            ###   ########.fr       */
+/*   Updated: 2021/12/15 15:08:44 by ayoub            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,6 +75,8 @@ static int	send_data(pid_t receiver, char *data)
 void h(int sig)
 {
 	//ft_printf("%d => %d\n", getpid(), bit_index);
+	usleep(50000);
+	write(1, "-", 1);
 	bit_index++;
 }
 
@@ -107,7 +109,7 @@ int main(int ac, char **av)
 	data[size + 1] = 0;
 	//send_data_size(server_pid, av[1]);
 	printf("%s\n", data);
-	send_data(server_pid, data);
+	send_data(server_pid, av[1]);
 
 	
 	gettimeofday(&tv, NULL);
