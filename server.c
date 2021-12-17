@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   server.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayoub <ayoub@student.42.fr>                +#+  +:+       +#+        */
+/*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 19:38:44 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/11 00:43:04 by ayoub            ###   ########.fr       */
+/*   Updated: 2021/12/17 20:41:24 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
 t_lclient *lc = NULL;
+
 
 int	print_unicode_char(char *str)
 {
@@ -40,16 +41,23 @@ void	print_unicode_str(char *str)
 
 void	allocate_data(t_client *c)
 {
+	t_lclient	*tmp;
+
 	//printf("->(%d)size of data %lu \n", (c->bit / UNIT_SIZE - 1), c->size);
 	*((char *)(&(c->size)) + (c->bit / UNIT_SIZE - 1)) = c->res;
 	if (c->bit == sizeof(size_t) * 8)
 	{
-		printf("->(%d)size of data %lu \n", (c->bit / UNIT_SIZE - 1), c->size);
+		//printf("->(%d)size of data %lu \n", (c->bit / UNIT_SIZE - 1), c->size);
 		c->bit = 0;
 		c->data = malloc(c->size + 1);
 		if (!c->data)
 		{
-			kill(c->pid, SIGUSR2);
+			tmp = lc;
+			while (tmp != NULL)
+			{
+				kill(tmp->client->pid, 9);
+				tmp = tmp->next;
+			}
 			exit(EXIT_FAILURE);
 		}
 		c->size = 0;
@@ -58,7 +66,7 @@ void	allocate_data(t_client *c)
 
 void	get_unit(t_client *c)
 {
-	//ft_printf("------####%d from client %d | bit = %d\n", c->res, c->pid, c->bit);
+	printf("------####%d from client %d | bit = %d\n", c->res, c->pid, c->bit);
 	if (c->data != NULL)
 	{
 		c->data[c->size] = c->res;
@@ -67,7 +75,7 @@ void	get_unit(t_client *c)
 		if (c->res == 0)
 		{
 			print_unicode_str(c->data);
-			ft_printf("-> From Client %d\n", c->pid);
+			printf("-> From Client %d\n", c->pid);
 			remove_client(&lc, c->pid);
 			return ;
 		}
@@ -80,28 +88,21 @@ void	get_unit(t_client *c)
 void	handler(int sig, siginfo_t *sinfo, void *p)
 {
 	t_client	*c;
+	int	b;
 
-	if (sig != SIGUSR1 && sig != SIGUSR2)
+	if ((sig != SIGUSR1 && sig != SIGUSR2) || sinfo->si_pid == 0)
 		return ;
 	c = add_or_find_c(&lc, sinfo->si_pid);
-	if (sig == SIGUSR1)
-	{
-		c->res = c->res + ((char)1 << (c->bit % UNIT_SIZE));
-		//ft_printf("received (%d, %d, 1)\n", c->bit + 1, c->pid);
-	}else
-	{
-		//ft_printf("received (%d, %d, 0)\n", c->bit + 1, c->pid);
-	}
+	b = ((char)1 << (c->bit % UNIT_SIZE)) * (SIGUSR1 / sig);
+	//printf("%d => %d__%d__%ld\n", c->pid, c->bit, (SIGUSR1 / sig), time_micro());
+	c->res = c->res + b;
 	c->bit = c->bit + 1;
-	//ft_printf("1.Send To %d\n", c->pid);
+	//printf("1.Send To %d\n", c->pid);
+	usleep(100);
 	kill(c->pid, SIGUSR1);
-	usleep(200);
+	//write(1, "*", 1);
 	if (c->bit % UNIT_SIZE == 0)
-	{
 		get_unit(c);
-		//remove_client(&lc, c->pid);
-		//print_list(lc);
-	}
 	usleep(WAIT_TIME);
 }
 

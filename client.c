@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   client.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayoub <ayoub@student.42.fr>                +#+  +:+       +#+        */
+/*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 20:50:51 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/15 15:08:44 by ayoub            ###   ########.fr       */
+/*   Updated: 2021/12/17 20:59:16 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-unsigned int	bit_index = 0;
+size_t	bit_index = 0;
 
 static int	check_is_valid(int ac, char **av)
 {
@@ -23,24 +23,50 @@ static int	check_is_valid(int ac, char **av)
 	return (1);
 }
 
+static void	my_sleep(size_t time)
+{
+	static unsigned int	oldbit;
+	const int chunk = 100;
+	
+	while (1)
+	{
+		time = time + chunk;
+		//printf("%d waiting\n", getpid());
+		if (time > time)
+		{
+			//printf("%d * %d\n", bit_index, oldbit);
+			time = 0;
+			//write(1, "*", 1);
+			break ;
+		}
+		if (bit_index != oldbit)
+		{
+			oldbit = bit_index;
+			//write(1, "-", 1);
+			usleep(chunk);
+			break ;
+		}
+		usleep(chunk);
+	}
+}
+
 static void	send_char(pid_t receiver, char a)
 {
-	unsigned char	bit;
-
-	//printf("send %d(%c)\n", a, a);
-	while (bit_index < UNIT_SIZE)
+	unsigned char		bit;
+	static unsigned int	time;
+	size_t				b;
+	
+	//printf("send %d(%c) bit = %d\n", a, a, bit_index);
+	b = bit_index % UNIT_SIZE;
+	while (b < UNIT_SIZE)
 	{
 		bit = ((a >> (bit_index)) & 1);
 		if (bit)
 			kill(receiver, SIGUSR1);
 		else
 			kill(receiver, SIGUSR2);
-		//ft_printf("From %d Send To Sever bit = (%d, %d)\n",getpid(), bit_index+1, bit);
-		//pause();
-		usleep(5000);
+		my_sleep(5000);
 	}
-	bit_index = 0;
-	//write(1, "end\n", 4);
 }
 
 static void send_data_size(pid_t receiver, char *data)
@@ -61,7 +87,7 @@ static void send_data_size(pid_t receiver, char *data)
 	}
 }
 
-static int	send_data(pid_t receiver, char *data)
+static void	send_data(pid_t receiver, char *data)
 {
 	send_data_size(receiver, data);
 	while (*data)
@@ -74,9 +100,7 @@ static int	send_data(pid_t receiver, char *data)
 
 void h(int sig)
 {
-	//ft_printf("%d => %d\n", getpid(), bit_index);
-	usleep(50000);
-	write(1, "-", 1);
+	//printf("%d\n", bit_index);
 	bit_index++;
 }
 
@@ -93,7 +117,7 @@ int main(int ac, char **av)
 
 	server_pid = get_server_pid();
 	data = av[1];
-	ft_printf("client Pid %d | server pid %d | data %u\n", getpid(), server_pid, atoi(av[1]));
+	ft_printf("clientt Pid %d | server pid %d | data %s\n", getpid(), server_pid, av[1]);
 	signal(SIGUSR1, h);
 	signal(SIGUSR2, d);
 	
@@ -102,14 +126,14 @@ int main(int ac, char **av)
   	double begin = (tv.tv_sec) * 1000000 + (tv.tv_usec) ;
 	  
 	int fd = open("file.txt", O_RDONLY);
-	int size = 1000;
+	int size = 100;
 	data = malloc(size + 1);
 	size = read(fd, data, size);
-	printf("%d\n", size);
+	//printf("%d\n", size);
 	data[size + 1] = 0;
 	//send_data_size(server_pid, av[1]);
 	printf("%s\n", data);
-	send_data(server_pid, av[1]);
+	send_data(server_pid, data);
 
 	
 	gettimeofday(&tv, NULL);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minitalk.h                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayoub <ayoub@student.42.fr>                +#+  +:+       +#+        */
+/*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 19:36:29 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/11 00:43:50 by ayoub            ###   ########.fr       */
+/*   Updated: 2021/12/17 20:01:30 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <stdlib.h>
 # include <signal.h>
 # include "ft_printf/ft_printf.h"
+# include "hamming_code/hamming_code.h"
 
 # include <stdio.h>
 # include <wchar.h>
@@ -29,7 +30,7 @@
 # include <sys/time.h>
 
 # define UNIT_SIZE 8
-# define WAIT_TIME 50
+# define WAIT_TIME 100
 
 typedef struct s_client
 {
@@ -46,8 +47,9 @@ typedef struct s_lclient
 	struct s_lclient	*next;	
 }	t_lclient;
 
-int			get_server_pid(void);
-void		share_server_pid(void);
+int				get_server_pid(void);
+void			share_server_pid(void);
+unsigned long	time_micro();
 
 t_client	*add_or_find_c(t_lclient **lc, pid_t pid);
 t_client	*get_next_c(t_lclient *lc, pid_t pid);

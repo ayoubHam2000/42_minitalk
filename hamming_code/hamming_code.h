@@ -1,38 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   hamming_code.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/12/07 14:50:11 by ayoub             #+#    #+#             */
-/*   Updated: 2021/12/16 18:53:30 by aben-ham         ###   ########.fr       */
+/*   Created: 2021/12/17 12:04:28 by aben-ham          #+#    #+#             */
+/*   Updated: 2021/12/17 20:01:58 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minitalk.h"
+#ifndef HAMMING_CODE_H
+# define HAMMING_CODE_H
 
-int get_server_pid()
-{
-	int pid;
+# include <stdio.h>
+# include <unistd.h>
+# include <stdlib.h>
+# define HM_OR 8
 
-	FILE *f = fopen("ppid", "r");
-	fscanf(f, "%d", &pid);
-	fclose(f);
-	return (pid);
-}
+char	parity_l(char c);
+char	parity_v(char *bits);
+char	parity_h(char *bits);
+char	parity_bc(char *bits, int nb);
+char	parity_all(char *bits);
+char	hammingc(char *bits);
 
-void share_server_pid()
-{
-	FILE *f = fopen("ppid", "w");
-	fprintf(f, "%d", getpid());
-	fclose(f);
-}
-
-unsigned  long time_micro()
-{
-	struct timeval tp;
-	gettimeofday(&tp, NULL);
-	long int ms = tp.tv_sec * 1000000 + tp.tv_usec;
-	return (ms);
-}
+#endif
