@@ -6,7 +6,7 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 19:38:44 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/17 20:41:24 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/17 23:13:24 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ void	get_unit(t_client *c)
 void	handler(int sig, siginfo_t *sinfo, void *p)
 {
 	t_client	*c;
-	int	b;
+	int			b;
 
 	if ((sig != SIGUSR1 && sig != SIGUSR2) || sinfo->si_pid == 0)
 		return ;

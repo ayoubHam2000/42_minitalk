@@ -1,2 +1,3 @@
 **/*.out
 ppid
+**/*.DS_Store

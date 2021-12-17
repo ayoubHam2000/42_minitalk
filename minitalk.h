@@ -6,7 +6,7 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 19:36:29 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/17 20:01:30 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/17 23:16:27 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,11 +34,12 @@
 
 typedef struct s_client
 {
-	pid_t	pid;
+	pid_t			pid;
 	unsigned char	res;
 	unsigned char	bit;
-	char	*data;
-	size_t	size;
+	char			*data;
+	size_t			size;
+	char			hamming[8];
 }	t_client;
 
 typedef struct s_lclient
