@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   client_list.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayoub <ayoub@student.42.fr>                +#+  +:+       +#+        */
+/*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/07 21:15:41 by ayoub             #+#    #+#             */
-/*   Updated: 2021/12/10 19:40:15 by ayoub            ###   ########.fr       */
+/*   Updated: 2021/12/20 21:06:07 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,3 +113,37 @@ void	print_list(t_lclient *lc)
 	}
 	ft_printf("#####\n");
 }
+
+
+//##################
+//##################
+//##################
+
+void	bezero(char *str, size_t len)
+{
+	size_t	i;
+
+	i = 0;
+	while (i < len)
+	{
+		str[i] = 0;
+		i++;
+	}
+}
+
+void	print_bits(char c)
+{
+	short	i;
+	char	b;
+
+	i = 0;
+	while (i < HM_OR)
+	{
+		b = ((c >> (HM_OR - i - 1)) & 1) + '0';
+		write(1, &b, 1);
+		write(1, " ", 1);
+		i++;
+	}
+	write(1, "\n", 1);
+}
+

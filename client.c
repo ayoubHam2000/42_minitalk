@@ -6,7 +6,7 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 20:50:51 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/17 23:10:38 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/20 22:08:20 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,22 +28,18 @@ static void	my_sleep(size_t t)
 	static unsigned int	oldbit;
 	static size_t	time;
 	const int chunk = 100;
-	
+
 	while (1)
 	{
 		time = time + chunk;
-		//printf("%d waiting\n", getpid());
 		if (time > t)
 		{
-			//printf("%d * %d\n", bit_index, oldbit);
 			time = 0;
-			//write(1, "*", 1);
 			break ;
 		}
 		if (bit_index != oldbit)
 		{
 			oldbit = bit_index;
-			//write(1, "-", 1);
 			usleep(chunk);
 			break ;
 		}
@@ -51,28 +47,12 @@ static void	my_sleep(size_t t)
 	}
 }
 
-static void	send_bit(pid_t receiver, char *data, int index)
+static char	*get_data_size(char *data, size_t size)
 {
-	unsigned char		bit;
-	
-	bit = ((data[index / UNIT_SIZE] >> (index % UNIT_SIZE)) & 1);
-	if (bit)
-		kill(receiver, SIGUSR1);
-	else
-		kill(receiver, SIGUSR2);
-	printf("send %d\n", bit);
-}
-
-static char	*get_data_size(pid_t receiver, char *data)
-{
-	size_t	size;
 	char	c;
 	char	i;
 	char	*res;
 
-	size = 0;
-	while (*data++ != 0)
-		size++;
 	res = malloc(8);
 	if (!res)
 	{
@@ -90,37 +70,81 @@ static char	*get_data_size(pid_t receiver, char *data)
 	return (res);
 }
 
+static void	send_bit(pid_t receiver, char *data, int index)
+{
+	unsigned char		bit;
+	
+	bit = ((data[index / UNIT_SIZE] >> (index % UNIT_SIZE)) & 1);
+	if (bit)
+		kill(receiver, SIGUSR1);
+	else
+		write(1, "0", 1);
+	write(1, " ", 1);
+		kill(receiver, SIGUSR2);
+}
+
+static void	send_buffer(pid_t receiver, char *data)
+{
+	int		i;
+	char	hb[8];
+
+	get_hamming_buffer(hb, data);
+	i = 0;
+	while (1)
+	{
+		while (i < 64)
+		{
+			send_bit(receiver, hb, i);
+			my_sleep(5000);
+			if (bit_index == 1)
+			{
+				i++;
+				bit_index = 0;
+			}
+		}
+		usleep(200);
+		if (bit_index == 0)
+			break ;
+		bit_index = 0;
+	}
+	bezero(data, 7);
+}
+
 static void	send_data(pid_t receiver, char *data)
 {
+	char	buffer[7];
 	char	*data_size;
+	size_t	i;
 	size_t	size;
 
 	size = 0;
 	while (data[size] != 0)
 		size++;
-	if (size == 0)
-		return ;
-	data_size = get_data_size(receiver, data);
-	size = size * UNIT_SIZE + 64;
-	while (bit_index < size + 8)
+	i = 0;
+	bezero(buffer, 7);
+	data_size = get_data_size(data, size);
+	while (i < size + 1 + 8)
 	{
-		if (bit_index < 64)
-			send_bit(receiver, data_size, bit_index);
+		if (i < 8)
+			buffer[i % 7] = data_size[i];
 		else
-			send_bit(receiver, data, bit_index - 64);
-		my_sleep(500000);
-	}	
+			buffer[i % 7] = data[i - 8];
+		if (i % 7 == 6)
+			send_buffer(receiver, buffer);
+		i++;
+	}
+	if (i % 7 != 0)
+		send_buffer(receiver, buffer);
 }
 
-void h(int sig)
+void next_bit(int sig)
 {
-	bit_index++;
+	bit_index = 1;
 }
 
-void d(int sig)
+void error_handler(int sig)
 {
-	if (bit_index > 57)
-		bit_index = bit_index - 57;
+	bit_index = -1;
 }
 
 char	*git_data_from_file()
@@ -142,17 +166,17 @@ int main(int ac, char **av)
 
 	server_pid = get_server_pid();
 	ft_printf("clientt Pid %d | server pid %d | data %s\n", getpid(), server_pid, av[1]);
-	signal(SIGUSR1, h);
-	signal(SIGUSR2, d);
+	signal(SIGUSR1, next_bit);
+	signal(SIGUSR2, error_handler);
 	
 	struct timeval	tv;
   	gettimeofday(&tv, NULL);
   	double begin = (tv.tv_sec) * 1000000 + (tv.tv_usec) ;
 	  
 	
-	printf("%s\n", av[1]);
-	send_data(server_pid, av[1]);
-
+	//printf("%s\n", av[1]);
+	//send_data(server_pid, av[1]);
+	send_data(0, av[1]);
 	
 	gettimeofday(&tv, NULL);
 	double end = (tv.tv_sec) * 1000000 + (tv.tv_usec) ;

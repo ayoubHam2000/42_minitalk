@@ -1,36 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   t.c                                                :+:      :+:    :+:   */
+/*   hamming_buffer.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/12/07 16:39:18 by ayoub             #+#    #+#             */
-/*   Updated: 2021/12/20 13:46:21 by aben-ham         ###   ########.fr       */
+/*   Created: 2021/12/20 10:43:01 by aben-ham          #+#    #+#             */
+/*   Updated: 2021/12/20 20:29:46 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minitalk.h"
+#include "hamming_code.h"
 
-
-void	print_bits(char c)
-{
-	short	i;
-	char	b;
-
-	i = 0;
-	while (i < HM_OR)
-	{
-		b = ((c >> (HM_OR - i - 1)) & 1) + '0';
-		write(1, &b, 1);
-		write(1, " ", 1);
-		i++;
-	}
-	write(1, "\n", 1);
-}
-
-
-int	hamming_index(int i)
+static int	hamming_index(int i)
 {
 	const int	b[7] = {0, 1, 2, 4, 8, 16, 32};
 	int			res;
@@ -94,93 +76,20 @@ void	get_hamming_buffer(char *buffer, char *message)
 	add_parity_check(buffer);
 }
 
-
-
 void	extract_from_hamming(char *message, char *buffer)
 {
-	char	i;
+	int		i;
 	char	h;
 
-	ft_memset(message, 0, 7);
+	i = 0;
+	while (i < 7)
+		message[i++] = 0;
 	i = 0;
 	while (i < 56)
 	{
 		h = hamming_index(i);
-		h = ((buffer[h / 8] >> (7 - h % 8)) & 1 );
+		h = ((buffer[h / 8] >> (7 - h % 8)) & 1);
 		message[i / 8] ^= (1 << (7 - (i % 8))) * h;
 		i++;
 	}
-}
-
-void test_add_buffer()
-{
-	char	bits[8];
-	char	message[7];
-	int		i;
-
-	ft_memset(bits, 0, 8);
-	add_to_buffer(bits, 0);
-	add_to_buffer(bits, 2);
-	add_to_buffer(bits, 55);
-	add_parity_check(bits);
-	extract_from_hamming(message, bits);
-	i = 0;
-	while (i < 8)
-	{
-		print_bits(bits[i]);
-		i++;
-	}
-	write(1, "\n", 1);
-	i = 0;
-	while (i < 7)
-	{
-		print_bits(message[i]);
-		i++;
-	}
-}
-
-void test_hamming_buffer()
-{
-	char	bits[8];
-	int		i;
-	char	message[7] = {
-		0b11100000,
-		0b11100000,
-		0b11100000,
-		0b11100000,
-		0b11100000,
-		0b11100000,
-		0b11100001
-	};
-	char	message_e[7];
-	
-	get_hamming_buffer(bits, message);
-	i = 0;
-	while (i < 7)
-	{
-		print_bits(message[i]);
-		i++;
-	}
-	write(1, "\n", 1);
-	i = 0;
-	while (i < 8)
-	{
-		print_bits(bits[i]);
-		i++;
-	}
-
-	write(1, "\n", 1);
-	extract_from_hamming(message_e, bits);
-	i = 0;
-	while (i < 7)
-	{
-		print_bits(message_e[i]);
-		i++;
-	}
-}
-
-int	main(int ac, char **av)
-{
-	test_hamming_buffer();
-	return (0);
 }

@@ -6,7 +6,7 @@
 #    By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/17 22:59:24 by aben-ham          #+#    #+#              #
-#    Updated: 2021/12/17 23:01:57 by aben-ham         ###   ########.fr        #
+#    Updated: 2021/12/20 18:19:29 by aben-ham         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,6 +14,7 @@ NAME = hamming.a
 CFLAGS =  -Wall -Wextra -Werror -I. -c
 FILES = hamming_code.c\
 			hamming_util.c\
+			hamming_buffer.c
 
 OBJ = $(FILES:.c=.o)
 

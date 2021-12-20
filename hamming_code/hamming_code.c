@@ -6,29 +6,11 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 12:06:57 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/17 20:50:28 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/20 20:50:39 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "hamming_code.h"
-
-/*
-void	print_bits(char c)
-{
-	short	i;
-	char	b;
-
-	i = 0;
-	while (i < HM_OR)
-	{
-		b = ((c >> (HM_OR - i - 1)) & 1) + '0';
-		write(1, &b, 1);
-		write(1, " ", 1);
-		i++;
-	}
-	write(1, "\n", 1);
-}
-*/
 
 static char	hamming_gete(char *bits)
 {

@@ -6,101 +6,78 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 19:38:44 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/17 23:13:24 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/20 21:04:42 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-t_lclient *lc = NULL;
-
-
-int	print_unicode_char(char *str)
+int	hamming_index(int i)
 {
-	int	i;
-	int bytes_rep;
+	const int	b[7] = {0, 1, 2, 4, 8, 16, 32};
+	int			res;
+	int			b_index;
 
-	i = 7;
-	bytes_rep = 0;
-	while (i >= 0 && *str >> i & 1)
+	res = 0;
+	b_index = 0;
+	while (i >= 0)
 	{
-		i--;
-		bytes_rep++;
-	}
-	if (bytes_rep == 0)
-		bytes_rep = 1;
-	write(1, str, bytes_rep);
-	return (bytes_rep);
-}
-
-void	print_unicode_str(char *str)
-{
-	while (*str)
-		str = str + print_unicode_char(str);
-}
-
-void	allocate_data(t_client *c)
-{
-	t_lclient	*tmp;
-
-	//printf("->(%d)size of data %lu \n", (c->bit / UNIT_SIZE - 1), c->size);
-	*((char *)(&(c->size)) + (c->bit / UNIT_SIZE - 1)) = c->res;
-	if (c->bit == sizeof(size_t) * 8)
-	{
-		//printf("->(%d)size of data %lu \n", (c->bit / UNIT_SIZE - 1), c->size);
-		c->bit = 0;
-		c->data = malloc(c->size + 1);
-		if (!c->data)
+		if (res == b[b_index])
 		{
-			tmp = lc;
-			while (tmp != NULL)
-			{
-				kill(tmp->client->pid, 9);
-				tmp = tmp->next;
-			}
-			exit(EXIT_FAILURE);
+			res++;
+			b_index++;
 		}
-		c->size = 0;
+		else
+		{
+			i--;
+			if (i >= 0)
+				res++;
+		}
 	}
+	return (res);
+}
+
+int	hamming_check(t_client *c)
+{
+	char	bits[8];
+	int		i;
+
+	i = 0;
+	while (i < 8)
+		bits[i++] = 0;
+	return(0);
+}
+
+void	collect()
+{
+	
 }
 
 void	get_unit(t_client *c)
 {
-	printf("------####%d from client %d | bit = %d\n", c->res, c->pid, c->bit);
-	if (c->data != NULL)
-	{
-		c->data[c->size] = c->res;
-		c->size++;
-		c->bit = 0;
-		if (c->res == 0)
-		{
-			print_unicode_str(c->data);
-			printf("-> From Client %d\n", c->pid);
-			remove_client(&lc, c->pid);
-			return ;
-		}
-	}
+	c->hammingb[(c->bit / 8) % 7] = c->res;
+	if (c->bit % 48 != 0)
+		return ;
+	if (hamming_check(c) == -1)
+		kill(c->pid, SIGUSR2);
 	else
-		allocate_data(c);
-	c->res = 0;
+		collect();
 }
 
 void	handler(int sig, siginfo_t *sinfo, void *p)
 {
-	t_client	*c;
-	int			b;
+	static t_lclient	*lc = NULL;
+	t_client			*c;
+	int					b;
 
 	if ((sig != SIGUSR1 && sig != SIGUSR2) || sinfo->si_pid == 0)
 		return ;
 	c = add_or_find_c(&lc, sinfo->si_pid);
 	b = ((char)1 << (c->bit % UNIT_SIZE)) * (SIGUSR1 / sig);
-	//printf("%d => %d__%d__%ld\n", c->pid, c->bit, (SIGUSR1 / sig), time_micro());
 	c->res = c->res + b;
 	c->bit = c->bit + 1;
-	//printf("1.Send To %d\n", c->pid);
 	usleep(100);
 	kill(c->pid, SIGUSR1);
-	//write(1, "*", 1);
 	if (c->bit % UNIT_SIZE == 0)
 		get_unit(c);
 	usleep(WAIT_TIME);

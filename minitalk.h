@@ -6,7 +6,7 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 19:36:29 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/17 23:16:27 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/20 20:51:21 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ typedef struct s_client
 	unsigned char	bit;
 	char			*data;
 	size_t			size;
-	char			hamming[8];
+	char			hammingb[7];
 }	t_client;
 
 typedef struct s_lclient
@@ -56,5 +56,8 @@ t_client	*add_or_find_c(t_lclient **lc, pid_t pid);
 t_client	*get_next_c(t_lclient *lc, pid_t pid);
 void		remove_client(t_lclient **lc, pid_t pid);
 void		print_list(t_lclient *lc);
+
+void	bezero(char *str, size_t len);
+void	print_bits(char c);
 
 #endif
