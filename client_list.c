@@ -6,7 +6,7 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/07 21:15:41 by ayoub             #+#    #+#             */
-/*   Updated: 2021/12/20 21:06:07 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/21 11:53:47 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ t_client	*add_or_find_c(t_lclient **lc, pid_t pid)
 	c->res = 0;
 	c->data = NULL;
 	c->size = 0;
+	c->i = 0;
 	newc->client = c;
 	newc->next = NULL;
 	if (!(*lc))
@@ -147,3 +148,10 @@ void	print_bits(char c)
 	write(1, "\n", 1);
 }
 
+size_t	get_time(void)
+{
+	struct timeval	tv;
+
+	gettimeofday(&tv, NULL);
+	return (((tv.tv_sec) * 1000 + (tv.tv_usec / 1000)));
+}

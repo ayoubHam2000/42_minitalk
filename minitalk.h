@@ -6,7 +6,7 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 19:36:29 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/20 20:51:21 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/21 11:53:59 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@
 # include <sys/time.h>
 
 # define UNIT_SIZE 8
-# define WAIT_TIME 100
+# define WAIT_TIME 150
 
 typedef struct s_client
 {
@@ -39,7 +39,8 @@ typedef struct s_client
 	unsigned char	bit;
 	char			*data;
 	size_t			size;
-	char			hammingb[7];
+	size_t			i;
+	char			hammingb[8];
 }	t_client;
 
 typedef struct s_lclient
@@ -59,5 +60,6 @@ void		print_list(t_lclient *lc);
 
 void	bezero(char *str, size_t len);
 void	print_bits(char c);
+size_t	get_time(void);
 
 #endif

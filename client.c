@@ -6,7 +6,7 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 20:50:51 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/20 22:08:20 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/21 12:02:35 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,9 +78,10 @@ static void	send_bit(pid_t receiver, char *data, int index)
 	if (bit)
 		kill(receiver, SIGUSR1);
 	else
-		write(1, "0", 1);
-	write(1, " ", 1);
 		kill(receiver, SIGUSR2);
+	/*printf("%d(%d) ", index, bit);
+	if (index % 8 == 7)
+		printf("\n");*/
 }
 
 static void	send_buffer(pid_t receiver, char *data)
@@ -88,7 +89,31 @@ static void	send_buffer(pid_t receiver, char *data)
 	int		i;
 	char	hb[8];
 
+	/*i = 0;
+	while (i < 7)
+	{
+		print_bits(data[i]);
+		i++;
+	}
+	printf("\n");*/
+	
 	get_hamming_buffer(hb, data);
+	/*i = 0;
+	while (i < 8)
+	{
+		print_bits(hb[i]);
+		i++;
+	}
+	printf("\n");*/
+	
+	//extract_from_hamming(data, hb);
+	/*i = 0;
+	while (i < 7)
+	{
+		print_bits(data[i]);
+		i++;
+	}
+	printf("\n");*/
 	i = 0;
 	while (1)
 	{
@@ -102,9 +127,17 @@ static void	send_buffer(pid_t receiver, char *data)
 				bit_index = 0;
 			}
 		}
-		usleep(200);
+		usleep(100);
+		//printf("%zu\n", get_time());
+		//pause();
+		//printf("%zu\n", get_time());
 		if (bit_index == 0)
 			break ;
+		if (bit_index == -1)
+		{
+			printf("resend %d\n", getpid());
+			i = 0;
+		}
 		bit_index = 0;
 	}
 	bezero(data, 7);
@@ -132,6 +165,7 @@ static void	send_data(pid_t receiver, char *data)
 		if (i % 7 == 6)
 			send_buffer(receiver, buffer);
 		i++;
+		//printf("\n");
 	}
 	if (i % 7 != 0)
 		send_buffer(receiver, buffer);
@@ -144,6 +178,7 @@ void next_bit(int sig)
 
 void error_handler(int sig)
 {
+	write(1, "-", 1);
 	bit_index = -1;
 }
 
@@ -176,7 +211,7 @@ int main(int ac, char **av)
 	
 	//printf("%s\n", av[1]);
 	//send_data(server_pid, av[1]);
-	send_data(0, av[1]);
+	send_data(server_pid, av[1]);
 	
 	gettimeofday(&tv, NULL);
 	double end = (tv.tv_sec) * 1000000 + (tv.tv_usec) ;

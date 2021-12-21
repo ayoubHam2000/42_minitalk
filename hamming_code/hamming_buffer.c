@@ -6,7 +6,7 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/20 10:43:01 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/20 20:29:46 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/21 10:14:55 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,24 +59,27 @@ void	add_parity_check(char *buffer)
 	}
 }
 
-void	get_hamming_buffer(char *buffer, char *message)
+void	get_hamming_buffer(char *hb, char *message)
 {
-	char	i;
+	int		i;
 	char	h;
 	char	bit;
 
 	i = 0;
+	while (i < 8)
+		hb[i++] = 0;
+	i = 0;
 	while (i < 56)
 	{
-		bit = (message[i / 8] >> (7 - i % 8)) & 1;
+		bit = (message[i / 8] >> (7 - (i % 8))) & 1;
 		h = hamming_index(i);
-		buffer[h / 8] ^= (1 << (7 - h % 8)) * bit;
+		hb[h / 8] ^= (1 << (7 - (h % 8))) * bit;
 		i++;
 	}
-	add_parity_check(buffer);
+	add_parity_check(hb);
 }
 
-void	extract_from_hamming(char *message, char *buffer)
+void	extract_from_hamming(char *message, char *hb)
 {
 	int		i;
 	char	h;
@@ -88,7 +91,7 @@ void	extract_from_hamming(char *message, char *buffer)
 	while (i < 56)
 	{
 		h = hamming_index(i);
-		h = ((buffer[h / 8] >> (7 - h % 8)) & 1);
+		h = ((hb[h / 8] >> (7 - (h % 8))) & 1);
 		message[i / 8] ^= (1 << (7 - (i % 8))) * h;
 		i++;
 	}
