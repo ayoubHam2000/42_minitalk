@@ -6,7 +6,7 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 19:38:44 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/21 12:03:07 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/22 13:06:06 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ void	collect(t_client *c, char *message)
 		{
 			//printf("->(%zu) => %c\n", c->i, message[(c->i) % 7]);
 			c->data[c->i - 8] = message[(c->i) % 7];
+			//write(1, &message[(c->i) % 7], 1);
 			if (!message[(c->i) % 7])
 			{
 				printf("client %d : \n", c->pid);
@@ -86,16 +87,14 @@ void	get_unit(t_client *c)
 	c->hammingb[c->bit / 8 - 1] = c->res;
 	if (c->bit % 64 == 0)
 	{
-		//usleep(1000);
-		//printf("%zu\n", get_time());
 		if (hammingc(c->hammingb))
 		{
-			write(1, "2_Error\n", 8);
+			//printf("%lu Error From %d\n", get_time(), c->pid);
 			kill(c->pid, SIGUSR2);
 		}
 		else
 		{	
-			//kill(c->pid, SIGUSR1);
+			kill(c->pid, SIGUSR1);
 			extract_from_hamming(message, c->hammingb);
 			collect(c, message);
 		}
@@ -117,15 +116,13 @@ void	handler(int sig, siginfo_t *sinfo, void *p)
 	c->res = c->res + b;
 	c->bit = c->bit + 1;
 	usleep(100);
-	kill(c->pid, SIGUSR1);
+	if (c->bit % 64 != 0)
+		kill(c->pid, SIGUSR1);
 	if (c->bit % UNIT_SIZE == 0)
 	{
 		get_unit(c);
 		c->bit = (c->bit) % 64;
-		//printf("\n");
-		//print_bits(c->res);
 		c->res = 0;
-		//printf("\n");
 	}
 	usleep(WAIT_TIME);
 }
@@ -136,7 +133,7 @@ int main()
 	struct sigaction s;
 	sigset_t	set;
 
-	ft_printf("server pid %d\n", getpid());
+	printf("server pid %d\n", getpid());
 	share_server_pid();
 	sigemptyset(&set);
 	sigaddset(&set, SIGUSR1);

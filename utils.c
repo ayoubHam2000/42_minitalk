@@ -6,7 +6,7 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/07 14:50:11 by ayoub             #+#    #+#             */
-/*   Updated: 2021/12/16 18:53:30 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/22 13:28:31 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ int get_server_pid()
 {
 	int pid;
 
-	FILE *f = fopen("ppid", "r");
+	FILE *f = fopen("pid.txt", "r");
 	fscanf(f, "%d", &pid);
 	fclose(f);
 	return (pid);
@@ -24,7 +24,7 @@ int get_server_pid()
 
 void share_server_pid()
 {
-	FILE *f = fopen("ppid", "w");
+	FILE *f = fopen("pid.txt", "w");
 	fprintf(f, "%d", getpid());
 	fclose(f);
 }

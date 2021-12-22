@@ -6,7 +6,7 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/07 21:15:41 by ayoub             #+#    #+#             */
-/*   Updated: 2021/12/21 11:53:47 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/22 13:24:56 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,16 +25,6 @@ static t_lclient	*find_c_node(t_lclient *lc, pid_t pid)
 	}
 	return (NULL);	
 }
-
-// t_client	*find_c(t_lclient *lc, pid_t pid)
-// {
-// 	t_lclient *tmp;
-
-// 	tmp = find_c_node(lc, pid);
-// 	if (!tmp)
-// 		return (NULL);
-// 	return (tmp->client);
-// }
 
 t_client	*add_or_find_c(t_lclient **lc, pid_t pid)
 {
@@ -103,22 +93,6 @@ void	remove_client(t_lclient **lc, pid_t pid)
 	prev->next = c->next;
 	free_client_node(c);
 }
-
-void	print_list(t_lclient *lc)
-{
-	ft_printf("#####\n");
-	while (lc)
-	{
-		ft_printf("%d\n", lc->client->pid);
-		lc = lc->next;
-	}
-	ft_printf("#####\n");
-}
-
-
-//##################
-//##################
-//##################
 
 void	bezero(char *str, size_t len)
 {

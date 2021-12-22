@@ -6,7 +6,7 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 19:36:29 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/21 11:53:59 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/22 13:05:42 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 # include <unistd.h>
 # include <stdlib.h>
 # include <signal.h>
-# include "ft_printf/ft_printf.h"
 # include "hamming_code/hamming_code.h"
 
 # include <stdio.h>
@@ -30,7 +29,7 @@
 # include <sys/time.h>
 
 # define UNIT_SIZE 8
-# define WAIT_TIME 150
+# define WAIT_TIME 100
 
 typedef struct s_client
 {
