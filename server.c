@@ -6,11 +6,17 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 19:38:44 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/22 15:39:51 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/22 16:40:49 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
+
+void	error_happen(pid_t p)
+{
+	kill(p, SIGUSR2);
+	exit(EXIT_FAILURE);
+}
 
 void	allocate_data(t_client *c)
 {
@@ -19,10 +25,7 @@ void	allocate_data(t_client *c)
 	{
 		c->data = malloc(c->size + 1);
 		if (!c->data)
-		{
-			kill(c->pid, SIGUSR2);
-			exit(EXIT_FAILURE);
-		}
+			error_happen(c->pid);
 		c->i = 0;
 	}
 	else
@@ -37,7 +40,6 @@ void	get_unit(t_client *c)
 		c->i++;
 		if (c->res == 0)
 		{
-			printf("%lu", c->i);
 			write(1, c->data, c->i);
 			free(c->data);
 			c->data = NULL;
@@ -55,7 +57,8 @@ void	handler(int sig, siginfo_t *sinfo, void *p)
 	static t_client	c;
 	int				b;
 
-	if ((sig != SIGUSR1 && sig != SIGUSR2) || sinfo->si_pid == 0)
+	p = NULL;
+	if (sinfo->si_pid == 0)
 		return ;
 	b = ((char)1 << (c.bit % 8)) * (SIGUSR1 / sig);
 	c.pid = sinfo->si_pid;
@@ -63,9 +66,10 @@ void	handler(int sig, siginfo_t *sinfo, void *p)
 	c.bit = c.bit + 1;
 	if (c.bit % 8 == 0)
 		get_unit(&c);
-	usleep(WAIT_TIME);
-	kill(c.pid, SIGUSR1);
-	usleep(WAIT_TIME);
+	usleep(WAIT_TIME_S);
+	if (kill(c.pid, SIGUSR1) == -1)
+		error_happen(c.pid);
+	usleep(WAIT_TIME_S);
 }
 
 int	main(void)
@@ -73,16 +77,20 @@ int	main(void)
 	struct sigaction	s;
 	sigset_t			set;
 
-	printf("server pid %d\n", getpid());
-	share_server_pid();
+	ft_putnbr((int)getpid());
+	write(1, "\n", 1);
 	sigemptyset(&set);
 	sigaddset(&set, SIGUSR1);
 	sigaddset(&set, SIGUSR2);
 	s.sa_sigaction = handler;
 	s.sa_flags = SA_SIGINFO;
 	s.sa_mask = set;
-	sigaction(SIGUSR1, &s, NULL);
-	sigaction(SIGUSR2, &s, NULL);
+	if (sigaction(SIGUSR1, &s, NULL) == -1
+		|| sigaction(SIGUSR2, &s, NULL) == -1)
+	{
+		write(1, "Error\n", 1);
+		return (0);
+	}
 	while (1)
 	{
 		pause();

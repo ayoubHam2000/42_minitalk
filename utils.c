@@ -6,62 +6,68 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/07 14:50:11 by ayoub             #+#    #+#             */
-/*   Updated: 2021/12/22 15:40:36 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/22 16:17:02 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-int get_server_pid()
-{
-	int	pid;
+#define MAX_ULONG_DIV_10 1844674407370955161U
 
-	FILE *f = fopen("ppid", "r");
-	fscanf(f, "%d", &pid);
-	fclose(f);
-	return (pid);
+static int	is_blank(char c)
+{
+	if (c == ' ' || c == '\f'
+		|| c == '\v' || c == '\t' || c == '\n' || c == '\r')
+		return (1);
+	return (0);
 }
 
-void share_server_pid()
+int	ft_atoi(const char *str)
 {
-	FILE *f = fopen("ppid", "w");
-	fprintf(f, "%d", getpid());
-	fclose(f);
-}
+	int					signe;
+	unsigned long long	res;
 
-unsigned  long time_micro()
-{
-	struct timeval tp;
-	gettimeofday(&tp, NULL);
-	long int ms = tp.tv_sec * 1000000 + tp.tv_usec;
-	return (ms);
-}
-
-char	*git_data_from_file()
-{
-	char	*data;
-
-	int fd = open("file.txt", O_RDONLY);
-	int size = 1000;
-	data = malloc(size + 1);
-	size = read(fd, data, size);
-	//printf("%d\n", size);
-	data[size + 1] = 0;
-	return (data);
-}
-
-void	print_bits(char c)
-{
-	short	i;
-	char	b;
-
-	i = 0;
-	while (i < 8)
+	while (is_blank(*str))
+		str++;
+	signe = 1;
+	if (*str == '-')
+		signe = -1;
+	if (*str == '+' || *str == '-')
+		str++;
+	res = 0;
+	while (*str >= '0' && *str <= '9')
 	{
-		b = ((c >> (8 - i - 1)) & 1) + '0';
-		write(1, &b, 1);
-		write(1, " ", 1);
-		i++;
+		if (res >= MAX_ULONG_DIV_10 && (*str - '0') > 5)
+		{
+			if (signe < 0)
+				return (0);
+			if (signe > 0)
+				return (-1);
+		}
+		res = res * 10;
+		res = res + (*str - '0');
+		str++;
 	}
-	write(1, "\n", 1);
+	return (res * signe);
+}
+
+static void	ft_putchar(char c)
+{
+	write(1, &c, 1);
+}
+
+void	ft_putnbr(int nb)
+{
+	if (nb < 0)
+	{
+		ft_putchar('-');
+		nb = -nb;
+	}
+	if (nb >= 10)
+	{
+		ft_putnbr(nb / 10);
+		nb = nb % 10;
+	}
+	if (nb < 10)
+		ft_putchar(nb + 48);
 }

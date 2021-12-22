@@ -6,7 +6,7 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 19:36:29 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/22 15:40:22 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/22 16:44:39 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,17 +17,9 @@
 # include <stdlib.h>
 # include <signal.h>
 
-# include <stdio.h>
-# include <wchar.h>
-# include <locale.h>
-# include <string.h>
-# include <fcntl.h>
-# include <sys/stat.h>
-# include <sys/types.h>
-# include <time.h>
-# include <sys/time.h>
-
-# define WAIT_TIME 50
+# define WAIT_TIME_S 20
+# define WAIT_TIME_C 50
+# define TIME_OUT 5000000
 
 typedef struct s_client
 {
@@ -39,10 +31,7 @@ typedef struct s_client
 	size_t			i;
 }	t_client;
 
-int				get_server_pid(void);
-void			share_server_pid(void);
-unsigned long	time_micro(void);
-char			*git_data_from_file(void);
-void			print_bits(char c);
+void	ft_putnbr(int nb);
+int		ft_atoi(const char *str);
 
 #endif

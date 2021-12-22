@@ -6,7 +6,7 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 20:50:51 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/22 15:39:31 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/22 16:40:10 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,27 +14,29 @@
 
 static int	g_bit_index = 0;
 
-static int	check_is_valid(int ac, char **av)
-{
-	if (ac != 3)
-		return (0);
-	if (atoi(av[1]) <= 0)
-		return (0);
-	return (1);
-}
-
 static void	send_char(pid_t receiver, char c)
 {
 	unsigned int	bit;
+	unsigned int	time_out;
+	int				e;
 
+	time_out = TIME_OUT;
 	while (g_bit_index < 8)
 	{
 		bit = ((c >> g_bit_index) & 1);
 		if (bit)
-			kill(receiver, SIGUSR1);
+			e = kill(receiver, SIGUSR1);
 		else
-			kill(receiver, SIGUSR2);
-		usleep(50);
+			e = kill(receiver, SIGUSR2);
+		if (e == -1)
+			exit(0);
+		usleep(WAIT_TIME_C);
+		time_out = time_out - WAIT_TIME_C;
+		if (time_out <= 0)
+		{
+			write(1, "Server Not Response\n", 20);
+			exit(0);
+		}
 	}
 	g_bit_index = 0;
 }
@@ -42,7 +44,7 @@ static void	send_char(pid_t receiver, char c)
 static void	send_data(pid_t receiver, char *data)
 {
 	size_t	size;
-	int		i;
+	size_t	i;
 	char	c;
 
 	size = 0;
@@ -59,7 +61,6 @@ static void	send_data(pid_t receiver, char *data)
 		else
 			send_char(receiver, data[i - 8]);
 		i++;
-		printf("%d\n", i - 8);
 	}
 }
 
@@ -74,24 +75,18 @@ void	handler(int sig)
 	}
 }
 
-int main(int ac, char **av)
+int	main(int ac, char **av)
 {
 	pid_t	server_pid;
 
-	server_pid = get_server_pid();
-	printf("clientt Pid %d | server pid %d | data %s\n", getpid(), server_pid, av[1]);
-	signal(SIGUSR1, handler);
-	signal(SIGUSR2, handler);
-	
-	struct timeval	tv;
-  	gettimeofday(&tv, NULL);
-  	double begin = (tv.tv_sec) * 1000000 + (tv.tv_usec);
-	  
-	
-	send_data(server_pid, git_data_from_file());
-	
-	gettimeofday(&tv, NULL);
-	double end = (tv.tv_sec) * 1000000 + (tv.tv_usec);
-  	printf("\nExecution time %f\n", end - begin);
+	if (ac != 3)
+		return (0);
+	server_pid = ft_atoi(av[1]);
+	if (server_pid <= 0)
+		return (0);
+	if (signal(SIGUSR1, handler) == SIG_ERR
+		|| signal(SIGUSR2, handler) == SIG_ERR)
+		return (0);
+	send_data(server_pid, av[2]);
 	return (0);
 }
