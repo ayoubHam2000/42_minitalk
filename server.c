@@ -6,137 +6,74 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 19:38:44 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/21 12:03:07 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/22 15:39:51 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
-int	print_unicode_char(char *str)
+void	allocate_data(t_client *c)
 {
-	int	i;
-	int bytes_rep;
-
-	i = 7;
-	bytes_rep = 0;
-	while (i >= 0 && *str >> i & 1)
-	{
-		i--;
-		bytes_rep++;
-	}
-	if (bytes_rep == 0)
-		bytes_rep = 1;
-	write(1, str, bytes_rep);
-	return (bytes_rep);
-}
-
-void	print_unicode_str(char *str)
-{
-	while (*str)
-		str = str + print_unicode_char(str);
-}
-
-void	allocate_data(t_client *c, char *message)
-{
-	t_lclient	*tmp;
-
-	//printf("->(%zu)size of data %zu \n", c->i, c->size);
-	*((char *)(&(c->size)) + c->i) = message[(c->i) % 7];
+	*((char *)(&(c->size)) + c->i) = c->res;
 	if (c->i == 7)
 	{
-		//printf("size of data %lu\n", c->size);
 		c->data = malloc(c->size + 1);
 		if (!c->data)
+		{
+			kill(c->pid, SIGUSR2);
 			exit(EXIT_FAILURE);
-	}	
-}
-
-void	collect(t_client *c, char *message)
-{
-	int	i;
-
-	while (1)
-	{
-		if (c->i < 8)
-		{
-			allocate_data(c, message);
 		}
-		else
-		{
-			//printf("->(%zu) => %c\n", c->i, message[(c->i) % 7]);
-			c->data[c->i - 8] = message[(c->i) % 7];
-			if (!message[(c->i) % 7])
-			{
-				printf("client %d : \n", c->pid);
-				print_unicode_str(c->data);
-				write(1, "\n", 1);
-				return ;
-			}
-		}
-		c->i++;
-		if ((c->i) % 7 == 0)
-			break ;
+		c->i = 0;
 	}
+	else
+		c->i++;
 }
 
 void	get_unit(t_client *c)
 {
-	char	message[7];
-
-	c->hammingb[c->bit / 8 - 1] = c->res;
-	if (c->bit % 64 == 0)
+	if (c->data != NULL)
 	{
-		//usleep(1000);
-		//printf("%zu\n", get_time());
-		if (hammingc(c->hammingb))
+		c->data[c->i] = c->res;
+		c->i++;
+		if (c->res == 0)
 		{
-			write(1, "2_Error\n", 8);
-			kill(c->pid, SIGUSR2);
+			printf("%lu", c->i);
+			write(1, c->data, c->i);
+			free(c->data);
+			c->data = NULL;
+			c->i = 0;
 		}
-		else
-		{	
-			//kill(c->pid, SIGUSR1);
-			extract_from_hamming(message, c->hammingb);
-			collect(c, message);
-		}
-		bezero(c->hammingb, 8);
 	}
+	else
+		allocate_data(c);
+	c->res = 0;
+	c->bit = 0;
 }
 
 void	handler(int sig, siginfo_t *sinfo, void *p)
 {
-	static t_lclient	*lc = NULL;
-	t_client			*c;
-	int					b;
+	static t_client	c;
+	int				b;
 
 	if ((sig != SIGUSR1 && sig != SIGUSR2) || sinfo->si_pid == 0)
 		return ;
-	c = add_or_find_c(&lc, sinfo->si_pid);
-	b = ((char)1 << (c->bit % UNIT_SIZE)) * (SIGUSR1 / sig);
-	//printf("%d(%d) ", c->bit, SIGUSR1 / sig);
-	c->res = c->res + b;
-	c->bit = c->bit + 1;
-	usleep(100);
-	kill(c->pid, SIGUSR1);
-	if (c->bit % UNIT_SIZE == 0)
-	{
-		get_unit(c);
-		c->bit = (c->bit) % 64;
-		//printf("\n");
-		//print_bits(c->res);
-		c->res = 0;
-		//printf("\n");
-	}
+	b = ((char)1 << (c.bit % 8)) * (SIGUSR1 / sig);
+	c.pid = sinfo->si_pid;
+	c.res = c.res + b;
+	c.bit = c.bit + 1;
+	if (c.bit % 8 == 0)
+		get_unit(&c);
+	usleep(WAIT_TIME);
+	kill(c.pid, SIGUSR1);
 	usleep(WAIT_TIME);
 }
 
-
-int main()
+int	main(void)
 {
-	struct sigaction s;
-	sigset_t	set;
+	struct sigaction	s;
+	sigset_t			set;
 
-	ft_printf("server pid %d\n", getpid());
+	printf("server pid %d\n", getpid());
 	share_server_pid();
 	sigemptyset(&set);
 	sigaddset(&set, SIGUSR1);
