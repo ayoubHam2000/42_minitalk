@@ -7,4 +7,4 @@ The CRC must be of L-1 bits.
 
 --------------------------------
 
-crc is not integrated with minitalk
+crc is not integrated with minitalk yet.
