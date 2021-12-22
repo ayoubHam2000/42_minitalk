@@ -6,22 +6,13 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 20:50:51 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/22 13:05:32 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/22 13:50:59 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
 
 size_t	bit_index = 0;
-
-static int	check_is_valid(int ac, char **av)
-{
-	if (ac != 3)
-		return (0);
-	if (atoi(av[1]) <= 0)
-		return (0);
-	return (1);
-}
 
 static void	my_sleep(size_t t)
 {
@@ -47,10 +38,10 @@ static void	my_sleep(size_t t)
 	}
 }
 
-static char	*get_data_size(char *data, size_t size)
+static char	*get_data_size(size_t size)
 {
 	char	c;
-	char	i;
+	int		i;
 	char	*res;
 
 	res = malloc(8);
@@ -107,7 +98,7 @@ static void	send_data(pid_t receiver, char *data)
 		size++;
 	i = 0;
 	bezero(buffer, 7);
-	data_size = get_data_size(data, size);
+	data_size = get_data_size(size);
 	while (i < size + 1 + 8)
 	{
 		if (i < 8)
@@ -125,11 +116,13 @@ static void	send_data(pid_t receiver, char *data)
 
 void next_bit(int sig)
 {
+	sig = 0;
 	bit_index++;
 }
 
 void error_handler(int sig)
 {
+	sig = 0;
 	printf("%lu resend from %d\n", get_time(), getpid());
 	bit_index = 0;
 }
@@ -151,6 +144,8 @@ int main(int ac, char **av)
 {
 	pid_t	server_pid;
 
+	ac = 0;
+	av = NULL;
 	server_pid = get_server_pid();
 	printf("clientt Pid %d | server pid %d | data %s\n", getpid(), server_pid, git_data_from_file());
 	signal(SIGUSR1, next_bit);

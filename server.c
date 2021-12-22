@@ -6,7 +6,7 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 19:38:44 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/22 13:06:06 by aben-ham         ###   ########.fr       */
+/*   Updated: 2021/12/22 13:50:02 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,9 +38,6 @@ void	print_unicode_str(char *str)
 
 void	allocate_data(t_client *c, char *message)
 {
-	t_lclient	*tmp;
-
-	//printf("->(%zu)size of data %zu \n", c->i, c->size);
 	*((char *)(&(c->size)) + c->i) = message[(c->i) % 7];
 	if (c->i == 7)
 	{
@@ -53,8 +50,6 @@ void	allocate_data(t_client *c, char *message)
 
 void	collect(t_client *c, char *message)
 {
-	int	i;
-
 	while (1)
 	{
 		if (c->i < 8)
@@ -108,6 +103,7 @@ void	handler(int sig, siginfo_t *sinfo, void *p)
 	t_client			*c;
 	int					b;
 
+	p = NULL;
 	if ((sig != SIGUSR1 && sig != SIGUSR2) || sinfo->si_pid == 0)
 		return ;
 	c = add_or_find_c(&lc, sinfo->si_pid);
@@ -126,7 +122,6 @@ void	handler(int sig, siginfo_t *sinfo, void *p)
 	}
 	usleep(WAIT_TIME);
 }
-
 
 int main()
 {
