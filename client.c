@@ -6,21 +6,20 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/02 20:50:51 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/22 16:40:10 by aben-ham         ###   ########.fr       */
+/*   Updated: 2022/02/09 19:56:52 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
+#include <stdio.h>
 
 static int	g_bit_index = 0;
 
 static void	send_char(pid_t receiver, char c)
 {
 	unsigned int	bit;
-	unsigned int	time_out;
 	int				e;
 
-	time_out = TIME_OUT;
 	while (g_bit_index < 8)
 	{
 		bit = ((c >> g_bit_index) & 1);
@@ -30,13 +29,8 @@ static void	send_char(pid_t receiver, char c)
 			e = kill(receiver, SIGUSR2);
 		if (e == -1)
 			exit(0);
+		pause();
 		usleep(WAIT_TIME_C);
-		time_out = time_out - WAIT_TIME_C;
-		if (time_out <= 0)
-		{
-			write(1, "Server Not Response\n", 20);
-			exit(0);
-		}
 	}
 	g_bit_index = 0;
 }
@@ -66,8 +60,15 @@ static void	send_data(pid_t receiver, char *data)
 
 void	handler(int sig)
 {
+	static int	n_message;
+
 	if (sig == SIGUSR1)
+	{
 		g_bit_index++;
+		ft_putnbr(n_message);
+		write(1, ". Message received\n", 19);
+		n_message++;
+	}
 	else if (sig == SIGUSR2)
 	{
 		write(1, "Internal Server error!\n", 23);

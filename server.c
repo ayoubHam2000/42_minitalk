@@ -6,7 +6,7 @@
 /*   By: aben-ham <aben-ham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/03 19:38:44 by aben-ham          #+#    #+#             */
-/*   Updated: 2021/12/22 16:40:49 by aben-ham         ###   ########.fr       */
+/*   Updated: 2022/02/09 20:23:15 by aben-ham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,6 @@ void	handler(int sig, siginfo_t *sinfo, void *p)
 	usleep(WAIT_TIME_S);
 	if (kill(c.pid, SIGUSR1) == -1)
 		error_happen(c.pid);
-	usleep(WAIT_TIME_S);
 }
 
 int	main(void)
@@ -92,8 +91,6 @@ int	main(void)
 		return (0);
 	}
 	while (1)
-	{
 		pause();
-	}
 	return (0);
 }
