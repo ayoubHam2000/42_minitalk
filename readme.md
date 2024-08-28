@@ -6,13 +6,13 @@ The purpose of this project is to code a small data exchange program using UNIX 
   <img src="./static/1.jpg">
 </p>
 
-# Key concepts
+## Key concepts
 
 - Bit manipulation
 - Bitwise operators
 - Unix signals
 
-# Unix signals
+## Unix signals
 
 1. Sending a Signal:
 
