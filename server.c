@@ -57,7 +57,7 @@ void	handler(int sig, siginfo_t *sinfo, void *p)
 	static t_client	c;
 	int				b;
 
-	p = NULL;
+	(void)(p);
 	if (sinfo->si_pid == 0)
 		return ;
 	b = ((char)1 << (c.bit % 8)) * (SIGUSR1 / sig);
